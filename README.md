@@ -1,10 +1,8 @@
 <div align="center">
 
-# wowrocks
+<img src="assets/logo.svg" alt="wowrocks logo" width="100%">
 
 The Lua package manager for World of Warcraft addons.
-
-<img src="assets/logo.svg" alt="wowrocks logo" width="100%">
 
 [![Lua](https://img.shields.io/badge/Lua-5.1%2B-2C2D72?style=flat-square&logo=lua&logoColor=white)](https://www.lua.org/)
 [![LuaRocks](https://img.shields.io/badge/LuaRocks-3.x-6B4FBB?style=flat-square)](https://luarocks.org/)
