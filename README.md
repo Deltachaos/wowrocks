@@ -12,15 +12,9 @@ The Lua package manager for World of Warcraft addons.
 
 ## What is wowrocks?
 
-wowrocks is the Lua package manager for World of Warcraft addons. It is built on [LuaRocks](https://luarocks.org/), so rockspecs and dependency constraints are already familiar if you have used LuaRocks before.
+wowrocks is the Lua package manager for World of Warcraft addons. It is built on [LuaRocks](https://luarocks.org/), so the workflow is familiar: dependencies live in a rockspec, with the same version constraints LuaRocks already uses.
 
-Day to day you use `wowrocks addon`, or the same commands through the shorter `wowaddon` name. They create an addon project, add LuaRocks packages and repository externals, and install them into the addon. World of Warcraft ships without Lua's `require`. wowrocks fills that in for you, so libraries keep the same `require` calls they use everywhere else.
-
-## Features
-
-- **`wowrocks addon` and `wowaddon`.** Create a project, install dependencies, require a LuaRocks package or a git URL, and download `.pkgmeta` externals. `install` and `require` scaffold the project if you have not run `init`. Both names run the same commands.
-- **Familiar to LuaRocks users.** Dependencies live in a rockspec, with the same version constraints LuaRocks already uses.
-- **`require` that works in WoW.** Installed libraries load through ordinary `require` calls inside the addon.
+It bridges that workflow with the tools WoW addon development already uses. LuaRocks packages install into the addon, and repository dependencies are `.pkgmeta` externals, the same files the [BigWigsMods packager](https://github.com/BigWigsMods/packager) reads. World of Warcraft ships without Lua's `require`. wowrocks fills that in, so libraries keep the same `require` calls they use everywhere else, and a much wider range of Lua packages can ship inside an addon.
 
 ## Installation
 
