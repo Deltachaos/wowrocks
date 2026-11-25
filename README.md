@@ -32,20 +32,7 @@ wowrocks needs a Lua interpreter and [LuaRocks](https://luarocks.org/) 3.x.
 luarocks install wowrocks
 ```
 
-## Quick Start
-
-Create an addon folder, then add a dependency. `wowaddon` is the short form of `wowrocks addon`.
-
-```bash
-wowrocks addon create MyAddon
-cd MyAddon
-wowaddon require dkjson
-wowaddon require https://github.com/WoWUIDev/Ace3
-```
-
-`create` writes a starter TOC and Lua file, runs `git init` when git is on PATH, then `wowaddon require busted --test` in the new directory. `require` and `install` scaffold the rest of the project if needed (gitignore, rockspec, TOC), then install. `init` does that scaffold explicitly. `require` adds a LuaRocks package to the rockspec, or records a repository URL as a `.pkgmeta` external, then installs it.
-
-## Existing addons
+## Quick start
 
 From the addon directory, `init` wires wowrocks into a project you already have. It writes the missing scaffold files, vendors dependencies into `Libs/WoWRocks`, and adds `Libs/WoWRocks/WowRocks.xml` after the TOC header.
 
@@ -62,6 +49,19 @@ wowaddon require https://github.com/WoWUIDev/Ace3
 local require = WoWRocks.require
 local json = require("dkjson")
 ```
+
+## Scaffold a new Addon
+
+Create an addon folder, then add a dependency. `wowaddon` is the short form of `wowrocks addon`.
+
+```bash
+wowrocks addon create MyAddon
+cd MyAddon
+wowaddon require dkjson
+wowaddon require https://github.com/WoWUIDev/Ace3
+```
+
+`create` writes a starter TOC and Lua file, runs `git init` when git is on PATH, then `wowaddon require busted --test` in the new directory. `require` and `install` scaffold the rest of the project if needed (gitignore, rockspec, TOC), then install. `init` does that scaffold explicitly. `require` adds a LuaRocks package to the rockspec, or records a repository URL as a `.pkgmeta` external, then installs it.
 
 ## Documentation
 
