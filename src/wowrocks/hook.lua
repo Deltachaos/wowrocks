@@ -19,8 +19,22 @@ local function ensure_fs()
    end
 end
 
+-- LuaRocks 3.8 stores this as "/share/lua/<ver>" (leading slash so the
+-- tree root can be concatenated). Later releases use "share/lua/<ver>".
+local function normalize_modules_path(lua_modules_path)
+   local normalized = lua_modules_path
+   if type(normalized) ~= "string" or normalized == "" then
+      normalized = "share/lua/" .. (cfg.lua_version or "5.1")
+   end
+   normalized = normalized:gsub("\\", "/"):gsub("^/+", ""):gsub("/+$", "")
+   if normalized == "" then
+      normalized = "share/lua/" .. (cfg.lua_version or "5.1")
+   end
+   return normalized
+end
+
 function hook.wow_modules_path(lua_modules_path)
-   local normalized = lua_modules_path:gsub("\\", "/")
+   local normalized = normalize_modules_path(lua_modules_path)
    if normalized:match("^share/") then
       return (normalized:gsub("^share/", "wow/"))
    end
@@ -68,8 +82,7 @@ end
 function hook.refresh(tree_root, lua_modules_path)
    ensure_fs()
    tree_root = fs.absolute_name(dir.normalize(tree_root))
-   lua_modules_path = lua_modules_path or cfg.lua_modules_path or "share/lua/" .. (cfg.lua_version or "5.1")
-   lua_modules_path = lua_modules_path:gsub("\\", "/")
+   lua_modules_path = normalize_modules_path(lua_modules_path or cfg.lua_modules_path)
 
    local share_dir = dir.path(tree_root, lua_modules_path)
    local wow_rel = hook.wow_modules_path(lua_modules_path)

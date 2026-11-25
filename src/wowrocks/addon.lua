@@ -101,6 +101,62 @@ Use -- to pass flags through to busted.
    parser_cmd = cmd
 end
 
+-- LuaRocks 3.8 (what CI installs) has no fs.lock_access. Without a
+-- fallback, addon install crashes before it vendors dependencies.
+local function lock_tree(root_dir, force)
+   if fs.lock_access then
+      return fs.lock_access(root_dir, force)
+   end
+   local ok, err = fs.make_dir(root_dir)
+   if not ok then
+      return nil, err
+   end
+   local lfs_ok, lfs = pcall(require, "lfs")
+   if lfs_ok and type(lfs.lock_dir) == "function" then
+      if force then
+         local lockfile = dir.path(root_dir, "lockfile.lfs")
+         lfs.rmdir(lockfile)
+         os.remove(lockfile)
+      end
+      return lfs.lock_dir(root_dir)
+   end
+   local lockfile = dir.path(root_dir, "lockfile.lfs")
+   if force then
+      os.remove(lockfile)
+   end
+   local tempfile = dir.path(root_dir, ".lock.tmp." .. tostring(math.random(1, 100000000)))
+   local fd, fderr = io.open(tempfile, "w")
+   if not fd then
+      return nil, "failed opening temp file " .. tempfile .. " for locking: " .. tostring(fderr)
+   end
+   fd:write("lock file for " .. root_dir)
+   fd:close()
+   local ln = "ln" .. (force and " -f" or "")
+   if fs.execute(ln, tempfile, lockfile) then
+      return { tempfile = tempfile, lockfile = lockfile }
+   end
+   os.remove(tempfile)
+   return nil, "File exists"
+end
+
+local function unlock_tree(lock)
+   if not lock then
+      return
+   end
+   if fs.unlock_access then
+      fs.unlock_access(lock)
+      return
+   end
+   if type(lock) == "table" and lock.lockfile then
+      os.remove(lock.lockfile)
+      if lock.tempfile then
+         os.remove(lock.tempfile)
+      end
+      return
+   end
+   lock:free()
+end
+
 local function use_addon_tree(args)
    local root_dir = fs.absolute_name(toc.TREE)
    local ok, err = fs.make_dir(root_dir)
@@ -126,7 +182,7 @@ local function install_rockspecs(args)
       return nil, err
    end
    local lock
-   lock, err = fs.lock_access(path.root_dir(cfg.root_dir), args.force_lock)
+   lock, err = lock_tree(path.root_dir(cfg.root_dir), args.force_lock)
    if not lock then
       err = args.force_lock and
          ("failed to force the lock" .. (err and ": " .. err or "")) or
@@ -177,7 +233,7 @@ local function install_rockspecs(args)
          end
       end
    end)
-   fs.unlock_access(lock)
+   unlock_tree(lock)
    if not call_ok then
       return nil, tostring(call_err)
    end

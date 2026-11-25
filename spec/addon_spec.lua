@@ -7,9 +7,17 @@ local function quote(s)
 end
 
 local function run(cmd)
-   local pipe = io.popen(cmd .. " 2>&1")
+   -- Lua 5.1 io.popen():close() is true whenever pclose itself works,
+   -- including when the child exits non-zero. Record the status in-band.
+   local pipe = io.popen(cmd .. " 2>&1; echo __WOWROCKS_EXIT:$?")
    local out = pipe:read("*a") or ""
    local ok, _, code = pipe:close()
+   local marker = out:match("\n?__WOWROCKS_EXIT:(%d+)%s*$")
+   if marker then
+      code = tonumber(marker)
+      out = out:gsub("\n?__WOWROCKS_EXIT:%d+%s*$", "")
+      ok = code == 0
+   end
    return out, ok, code
 end
 
