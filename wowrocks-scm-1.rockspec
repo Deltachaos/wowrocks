@@ -1,5 +1,5 @@
 package = "wowrocks"
-version = "0.1.0-1"
+version = "scm-1"
 source = {
    url = ".",
 }
