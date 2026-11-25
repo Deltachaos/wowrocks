@@ -1,0 +1,16 @@
+#!/usr/bin/env lua
+
+local src = debug.getinfo(1, "S").source
+if src:sub(1, 1) == "@" then
+   local script = src:sub(2)
+   local dir = script:match("^(.*)/[^/]+$") or script:match("^(.*)\\[^\\]+$") or "."
+   package.path = dir .. "/../src/?.lua;" .. dir .. "/../src/?/init.lua;" .. package.path
+end
+
+local unpack = table.unpack or unpack
+local n = select("#", ...)
+local args = { "addon" }
+for i = 1, n do
+   args[i + 1] = select(i, ...)
+end
+require("wowrocks.cli").run(unpack(args, 1, n + 1))

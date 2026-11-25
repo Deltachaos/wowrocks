@@ -1,0 +1,10 @@
+#!/usr/bin/env lua
+
+local src = debug.getinfo(1, "S").source
+if src:sub(1, 1) == "@" then
+   local script = src:sub(2)
+   local dir = script:match("^(.*)/[^/]+$") or script:match("^(.*)\\[^\\]+$") or "."
+   package.path = dir .. "/../src/?.lua;" .. dir .. "/../src/?/init.lua;" .. package.path
+end
+
+require("wowrocks.cli").run(...)

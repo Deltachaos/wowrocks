@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["[0-9]*.[0-9]*.[0-9]*"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+
+      - uses: leafo/gh-actions-luarocks@v4
+
+      - name: Install test dependencies
+        run: luarocks test --prepare wowrocks-scm-1.rockspec
+
+      - name: Run tests
+        run: busted
+
+  publish:
+    name: Publish to LuaRocks
+    needs: test
+    if: github.event_name == 'push' && github.ref_type == 'tag' && github.repository == 'Deltachaos/wowrocks'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leafo/gh-actions-lua@v13
+        with:
+          luaVersion: "5.1"
+
+      - uses: leafo/gh-actions-luarocks@v6
+        with:
+          luaRocksVersion: "3.13.0"
+
+      - name: Generate release rockspec
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag must look like 1.2.3 (got ${tag})"
+            exit 1
+          fi
+          luarocks new-version --tag "$tag" wowrocks-scm-1.rockspec
+          rockspec="wowrocks-${tag}-1.rockspec"
+          test -f "$rockspec"
+          luarocks lint "$rockspec"
+          echo "ROCKSPEC=${rockspec}" >> "$GITHUB_ENV"
+
+      - name: Build release rockspec
+        run: luarocks make --deps-mode=none "$ROCKSPEC"
+
+      - name: Upload to LuaRocks
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        run: |
+          test -n "$LUAROCKS_API_KEY" || {
+            echo "Set the LUAROCKS_API_KEY repository secret from https://luarocks.org/settings/api-keys"
+            exit 1
+          }
+          luarocks upload --temp-key "$LUAROCKS_API_KEY" "$ROCKSPEC"

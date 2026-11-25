@@ -1,0 +1,5 @@
+spec/tmp/
+lua_modules/
+.luarocks/
+*.rock
+*.src.rock

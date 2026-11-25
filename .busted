@@ -1,0 +1,7 @@
+return {
+   default = {
+      verbose = true,
+      lpath = "src/?.lua;src/?/init.lua",
+      helper = "spec/helper.lua",
+   },
+}
