@@ -1,7 +1,7 @@
 package = "wowrocks"
 version = "scm-1"
 source = {
-   url = ".",
+   url = "git+https://github.com/Deltachaos/wowrocks.git",
 }
 description = {
    summary = "LuaRocks drop-in that stringifies installed Lua for World of Warcraft",
